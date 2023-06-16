@@ -1,0 +1,21 @@
+{
+	"name": "Portenta-I2S",
+	"version": "1.0.0",
+	"description": "A simple I2S implementation using HAL for the Portenta H7 series.",
+	"repository":
+  {
+    "type": "git",
+    "url": "https://github.com/trylaarsdam/portenta-i2s.git"
+  },
+	"authors": 
+	[
+		{
+			"name": "Todd Rylaarsdam",
+			"email": "todd@toddr.org",
+			"url": "https://toddr.org",
+			"maintainer": true
+		}
+	],
+	"frameworks": "Arduino",
+  "platforms": "*"
+}

@@ -38,10 +38,16 @@ void PortentaI2S::begin(void)
 	I2S_Init();
 }
 
-void PortentaI2S::play(uint16_t *buffer, uint32_t bufferSize)
+void PortentaI2S::play(uint16_t* buffer, int bufferSize)
 {
-	HAL_I2S_Transmit(&hi2s2, buffer, bufferSize, HAL_MAX_DELAY);
 	/*
+	if(HAL_I2S_Transmit(&hi2s2, buffer, bufferSize, HAL_MAX_DELAY) != HAL_OK)
+	{
+		Serial.println("HAL I2S Transmit Error");
+	}
+	delay(bufferSize / audioFreq * 1000);
+	*/
+	
 	uint16_t numBuffers = bufferSize / I2S_BUFFER_SIZE;
 	if(bufferSize % I2S_BUFFER_SIZE != 0)
 	{
@@ -65,28 +71,12 @@ void PortentaI2S::play(uint16_t *buffer, uint32_t bufferSize)
 		// transmit audioBuffer
 		if(i2sSelection == USE_I2S1)
 		{
-			HAL_I2S_Transmit(&hi2s1, audioBuffer, I2S_BUFFER_SIZE, HAL_MAX_DELAY);
+			// HAL_I2S_Transmit(&hi2s1, audioBuffer, I2S_BUFFER_SIZE, HAL_MAX_DELAY);
 		}
 		else
 		{
 			HAL_I2S_Transmit(&hi2s2, audioBuffer, I2S_BUFFER_SIZE, HAL_MAX_DELAY);
 		}
-	}*/
-}
-
-void PortentaI2S::playSineWave(double freq, uint32_t duration)
-{
-	// uint32_t numSamples = duration * audioFreq / 1000;
-	long timer = millis();
-	uint32_t numSamples = 8192;
-	uint16_t buffer[numSamples];
-	int i = 0;
-	while (i < nsamples)
-	{
-		double t = ((double)i / 2.0) / ((double)nsamples);
-		buffer[i] = 32767 * sin((freq - FREQ_OFFSET) * TAU * t); // left channel
-		buffer[i + 1] = buffer[i];															 // right channel (same)
-		i += 2;
+		delay(I2S_BUFFER_SIZE / audioFreq * 1000);
 	}
-	play(buffer, numSamples);
 }

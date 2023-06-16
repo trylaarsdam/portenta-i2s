@@ -18,8 +18,6 @@
 class PortentaI2S 
 {
 	private:
-		I2S_HandleTypeDef hi2s2;
-		I2S_HandleTypeDef hi2s1;
 		bool i2sSelection;
 		unsigned long audioFreq;
 		GPIO_InitTypeDef GPIO_InitStruct;
@@ -27,10 +25,8 @@ class PortentaI2S
 		void GPIO_Init(void);
 		uint16_t audioBuffer[I2S_BUFFER_SIZE]; // for both left + right
 		const int nsamples = I2S_BUFFER_SIZE / 2;
-
 	public:
 		PortentaI2S(bool i2s = USE_I2S2, uint32_t sampleRate = 44100.0);
 		void begin(void);
-		void play(uint16_t* buffer, uint32_t bufferSize);
-		void playSineWave(double freq, uint32_t duration);
+		void play(uint16_t* buffer, int bufferSize);
 };
