@@ -63,7 +63,7 @@ for(int i = 0; i < numSamples; i++){
 	if((i * 2) % 8192 == 0 && i != 0)
 	{
 		HAL_I2S_Transmit(&hi2s2, stereoSamples, 8192, HAL_MAX_DELAY);
- 	        delay(8192 / 22100 * 1000); // replace 22100 with your sample rate
+ 	        delay(8192 / 22050 * 1000); // replace 22050 with your sample rate
 	}
 }
 ```
