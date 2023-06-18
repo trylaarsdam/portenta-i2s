@@ -55,16 +55,16 @@ unsigned int numSamples = audio_file_raw_len / 2;
 uint16_t stereoSamples[8192];
 
 for(int i = 0; i < numSamples; i++){
-		int16_t rawSample = audio_file_raw[i * 2] | (audio_file_raw[i * 2 + 1] << 8);
-		// convert to unsigned 16 bit sample
-		stereoSamples[(i * 2) % 8192] = rawSample;
-		stereoSamples[((i * 2) % 8192) + 1] = rawSample;
-
-		if((i * 2) % 8192 == 0 && i != 0)
-		{
-		    HAL_I2S_Transmit(&hi2s2, stereoSamples, 8192, HAL_MAX_DELAY);
-        delay(8192 / 22100 * 1000); // replace 22100 with your sample rate
-		}
+	int16_t rawSample = audio_file_raw[i * 2] | (audio_file_raw[i * 2 + 1] << 8);
+	// convert to unsigned 16 bit sample
+	stereoSamples[(i * 2) % 8192] = rawSample;
+	stereoSamples[((i * 2) % 8192) + 1] = rawSample;
+	
+	if((i * 2) % 8192 == 0 && i != 0)
+	{
+		HAL_I2S_Transmit(&hi2s2, stereoSamples, 8192, HAL_MAX_DELAY);
+ 	        delay(8192 / 22100 * 1000); // replace 22100 with your sample rate
+	}
 }
 ```
 
