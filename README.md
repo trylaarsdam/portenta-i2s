@@ -4,6 +4,8 @@ This library allows you to use the I2S protocol on the Arduino Portenta H7 in Pl
 
 Huge thanks to Max Gerhardt from PlatformIO for helping me get I2S ported from Cube to PlatformIO.
 
+If you want a full tutorial check out my [dev blog article](https://dev.toddr.org/i2s-audio-playback-on-the-portenta-h7/).
+
 ## Usage
 1. Create the I2S object
 ```cpp
