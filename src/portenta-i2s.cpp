@@ -80,3 +80,13 @@ void PortentaI2S::play(uint16_t* buffer, int bufferSize)
 		delay(I2S_BUFFER_SIZE / audioFreq * 1000);
 	}
 }
+
+void PortentaI2S::record(uint32_t* buffer, uint32_t size)
+{
+
+}
+
+void PortentaI2S::record(uint16_t* buffer, uint32_t size)
+{
+	
+}
