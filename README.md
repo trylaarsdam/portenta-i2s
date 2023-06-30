@@ -34,5 +34,10 @@ i2s.begin();
 i2s.play(buffer, bufferLen);
 ```
 
+4. Record audio into a 32bit buffer
+```cpp
+
+```
+
 ## Examples
-A simple example is provided for both the M4 and M7 cores (usage is the same no matter the core), which plays a sine wave at 440.0Hz (A4) out of the I2S2 interface.
+Two examples are provided - one which generates and plays back a simple sine wave, and one which plays back a prerecorded audio file, records audio from the microphone immediately after, and then sends the recorded audio to the serial port, where you can parse it with Audacity as 32-bit signed PCM stereo audio. You can find a full guide [here](https://dev.toddr.org/i2s-audio-playback-on-the-portenta-h7/).
