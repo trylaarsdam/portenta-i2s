@@ -4,6 +4,8 @@ This library allows you to use the I2S protocol on the Arduino Portenta H7 in Pl
 
 Huge thanks to Max Gerhardt from PlatformIO for helping me get I2S ported from Cube to PlatformIO.
 
+If you want a full tutorial check out my [dev blog article](https://dev.toddr.org/i2s-audio-playback-on-the-portenta-h7/).
+
 ## Usage
 1. Create the I2S object
 ```cpp
@@ -52,4 +54,22 @@ i2s.record(rxBuffer, BUFFER_LEN);
 ```
 
 ## Examples
+
 Two examples are provided - one which generates and plays back a simple sine wave, and one which plays back a prerecorded audio file, records audio from the microphone immediately after, and then sends the recorded audio to the serial port, where you can parse it with Audacity as 32-bit signed PCM stereo audio. You can find a full guide [here](https://dev.toddr.org/i2s-audio-playback-on-the-portenta-h7/). 
+
+## Playing audio files
+To play audio files, you can follow these steps:
+1. Open the audio file you want to play in Audacity (or equivalent software)
+2. Save the file as a RAW file with no headers, and in 8-bit signed PCM format
+3. On Linux/Mac, use `xxd` to create a C header file
+```bash
+xxd -i {your-file.raw} > audio-file.h
+```
+4. Copy the file into your project, and include it into main.c.
+5. Configure the I2S library with a sample rate that matches your audio file (important, otherwise your file will play at the wrong speed)
+6. Use this code to play the file
+```cpp
+#include "audio-file.h"
+
+i2s.play(your_file_raw, your_file_raw_len);
+```
