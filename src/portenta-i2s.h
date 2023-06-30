@@ -29,6 +29,6 @@ class PortentaI2S
 		PortentaI2S(bool i2s = USE_I2S2, uint32_t sampleRate = 44100.0);
 		void begin(void);
 		void play(uint16_t* buffer, int bufferSize);
-		void PortentaI2S::record(uint32_t* buffer, uint32_t size);
-		void PortentaI2S::record(uint16_t* buffer, uint32_t size);
+		void play(uint8_t* file, unsigned int fileSize);
+		void record(uint32_t* buffer, unsigned int bufferSize);
 };

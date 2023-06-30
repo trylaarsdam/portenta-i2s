@@ -35,11 +35,21 @@ PortentaI2S::PortentaI2S(bool i2s, uint32_t sampleRate)
 void PortentaI2S::begin(void)
 {
 	GPIO_Init();
+	// I2S_Interrupt_Init();
+	// I2S2_IRQHandler();
 	I2S_Init();
 }
 
 void PortentaI2S::play(uint16_t* buffer, int bufferSize)
-{	
+{
+	/*
+	if(HAL_I2S_Transmit(&hi2s2, buffer, bufferSize, HAL_MAX_DELAY) != HAL_OK)
+	{
+		Serial.println("HAL I2S Transmit Error");
+	}
+	delay(bufferSize / audioFreq * 1000);
+	*/
+	
 	uint16_t numBuffers = bufferSize / I2S_BUFFER_SIZE;
 	if(bufferSize % I2S_BUFFER_SIZE != 0)
 	{
@@ -73,98 +83,78 @@ void PortentaI2S::play(uint16_t* buffer, int bufferSize)
 	}
 }
 
-void PortentaI2S::record(uint32_t* buffer, uint32_t size)
+void PortentaI2S::play(uint8_t* file, unsigned int fileSize)
 {
-	uint32_t counter = size, dummy;
-
-	// Check if I2S is enabled
-	if((hi2s2.Instance->CR1 & SPI_CR1_SPE) == SPI_CR1_SPE)
+	I2S2_Prep_TX();
+	uint16_t buffer[8192];
+	memset(buffer, 0, (8192) * sizeof(uint16_t));
+	for(unsigned int i = 0; i < fileSize; i++)
 	{
-		// Disable it
-		__HAL_I2S_DISABLE(&hi2s2);
-	}
+		// convert file bytes to 32 bit samples
+		uint8_t unsigned8Bit = file[i];
+		buffer[(i * 2) % 8192] = (uint16_t)unsigned8Bit << 8; // left channel
+		buffer[(i * 2 + 1) % 8192] = (uint16_t)unsigned8Bit << 8; // right channel
 
-	// Clear I2S flags
-	__HAL_I2S_CLEAR_OVRFLAG(&hi2s2);
-	__HAL_I2S_CLEAR_TIFREFLAG(&hi2s2);
-	__HAL_I2S_CLEAR_UDRFLAG(&hi2s2);
-
-	// Check for dummy data in RXDR
-	if(__HAL_I2S_GET_FLAG(&hi2s2, I2S_FLAG_RXP) == SET)
-	{
-		dummy = hi2s2.Instance->RXDR;
-	}
-
-	// Enable I2S
-	__HAL_I2S_ENABLE(&hi2s2);
-
-	// Start data transfer
-	SET_BIT(hi2s2.Instance->CR1, SPI_CR1_CSTART);
-
-	while(counter > 0)
-	{
-		// wait for RXP flag to be set
-		while(__HAL_I2S_GET_FLAG(&hi2s2, I2S_FLAG_RXP) != SET);
-
-		buffer[size - counter] = *((uint32_t *)&hi2s2.Instance->RXDR);
-
-		// check for overruns
-		if(__HAL_I2S_GET_FLAG(&hi2s2, I2S_FLAG_OVR) == SET)
+		// transmit buffer if full (4096 samples)
+		if(i % 4096 == 0 && i != 0)
 		{
-			// clear overrun flag
-			__HAL_I2S_CLEAR_OVRFLAG(&hi2s2);
+			HAL_I2S_Transmit(&hi2s2, buffer, 8192, HAL_MAX_DELAY);
+			memset(buffer, 0, (8192) * sizeof(uint16_t));
 		}
-
-		counter--;
+		else if(i == fileSize - 1)
+		{
+			HAL_I2S_Transmit(&hi2s2, buffer, 8192, HAL_MAX_DELAY);
+		}
 	}
 
-	__HAL_I2S_DISABLE(&hi2s2);
+	delete[] buffer;
+	I2S2_Prep_RX();
 }
 
-void PortentaI2S::record(uint16_t* buffer, uint32_t size)
+void PortentaI2S::record(uint32_t* buffer, unsigned int bufferSize)
 {
-	uint32_t counter = size, dummy;
-
-	// Check if I2S is enabled
-	if((hi2s2.Instance->CR1 & SPI_CR1_SPE) == SPI_CR1_SPE)
+	HAL_I2S_Transmit(&hi2s2, (uint16_t*)buffer, 1, HAL_MAX_DELAY);
+	uint32_t counter = bufferSize, dummy;
+	// Check if the Peripheral is enabled
+	if ((hi2s2.Instance->CR1 & SPI_CR1_SPE) == SPI_CR1_SPE)
 	{
-		// Disable it
+		/* Disable the I2S peripheral */
 		__HAL_I2S_DISABLE(&hi2s2);
 	}
-
-	// Clear I2S flags
+	
+	// Clear all flags
 	__HAL_I2S_CLEAR_OVRFLAG(&hi2s2);
 	__HAL_I2S_CLEAR_TIFREFLAG(&hi2s2);
 	__HAL_I2S_CLEAR_UDRFLAG(&hi2s2);
-
-	// Check for dummy data in RXDR
+	
+	//Check if there are dummy data in the RXDR
 	if(__HAL_I2S_GET_FLAG(&hi2s2, I2S_FLAG_RXP) == SET)
 	{
 		dummy = hi2s2.Instance->RXDR;
 	}
-
-	// Enable I2S
+	
+	/* Enable I2S peripheral */
 	__HAL_I2S_ENABLE(&hi2s2);
-
-	// Start data transfer
+	
+	/* Start the transfer */
 	SET_BIT(hi2s2.Instance->CR1, SPI_CR1_CSTART);
-
+ 
 	while(counter > 0)
 	{
-		// wait for RXP flag to be set
-		while(__HAL_I2S_GET_FLAG(&hi2s2, I2S_FLAG_RXP) != SET);
-
-		buffer[size - counter] = *((uint16_t *)&hi2s2.Instance->RXDR);
-
-		// check for overruns
-		if(__HAL_I2S_GET_FLAG(&hi2s2, I2S_FLAG_OVR) == SET)
+		while (__HAL_I2S_GET_FLAG(&hi2s2, I2S_FLAG_RXP) != SET);
+ 
+		buffer[bufferSize - counter] = *((uint32_t *)&hi2s2.Instance->RXDR);
+ 
+		if (__HAL_I2S_GET_FLAG(&hi2s2, I2S_FLAG_OVR) == SET)
 		{
-			// clear overrun flag
+			/* Clear overrun flag */
 			__HAL_I2S_CLEAR_OVRFLAG(&hi2s2);
+			// Serial.println("OVR");
 		}
-
+ 
 		counter--;
 	}
-
+	
+	// Disable the peripheral
 	__HAL_I2S_DISABLE(&hi2s2);
 }

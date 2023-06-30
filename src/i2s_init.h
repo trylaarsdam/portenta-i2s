@@ -11,8 +11,12 @@ extern I2S_HandleTypeDef hi2s1;
 
 void MX_GPIO_Init_I2S1(void);
 void MX_GPIO_Init_I2S2(void);
+void I2S_Interrupt_Init(void);
+void I2S2_IRQHandler(void);
 void MX_I2S1_Init(unsigned long audioFreq);
 void MX_I2S2_Init(unsigned long audioFreq);
+void I2S2_Prep_TX();
+void I2S2_Prep_RX();
 void HAL_I2S_MspInit(I2S_HandleTypeDef* hi2s);
 
 #ifdef __cplusplus
