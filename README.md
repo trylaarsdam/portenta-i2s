@@ -32,17 +32,35 @@ i2s.begin();
 ```
 
 3. Play your audio buffer
+
+You can do this 2 ways - either by create a 16bit audio buffer and calling play:
 ```cpp
 i2s.play(buffer, bufferLen);
 ```
 
+Or you can also read a raw 8-bit PCM audio file, and provide it directly to i2s.play:
+```cpp
+#include "audio-file.h"
+i2s.play(audio_file_raw, audio_file_raw_len);
+```
+
+You can see documentation on how to generate such a file [here](https://dev.toddr.org/i2s-audio-playback-on-the-portenta-h7/).
+
+4. Record audio into a 32bit buffer
+```cpp
+#define BUFFER_LEN 8000 * 5 * 2 // 8000hz for 5 seconds for 2 channels (left, right)
+uint32_t rxBuffer[BUFFER_LEN];
+i2s.record(rxBuffer, BUFFER_LEN);
+```
+
 ## Examples
-A simple example is provided for both the M4 and M7 cores (usage is the same no matter the core), which plays a sine wave at 440.0Hz (A4) out of the I2S2 interface.
+
+Two examples are provided - one which generates and plays back a simple sine wave, and one which plays back a prerecorded audio file, records audio from the microphone immediately after, and then sends the recorded audio to the serial port, where you can parse it with Audacity as 32-bit signed PCM stereo audio. You can find a full guide [here](https://dev.toddr.org/i2s-audio-playback-on-the-portenta-h7/). 
 
 ## Playing audio files
 To play audio files, you can follow these steps:
 1. Open the audio file you want to play in Audacity (or equivalent software)
-2. Save the file as a RAW file with no headers, and in 16-bit signed PCM format
+2. Save the file as a RAW file with no headers, and in 8-bit signed PCM format
 3. On Linux/Mac, use `xxd` to create a C header file
 ```bash
 xxd -i {your-file.raw} > audio-file.h
@@ -51,23 +69,7 @@ xxd -i {your-file.raw} > audio-file.h
 5. Configure the I2S library with a sample rate that matches your audio file (important, otherwise your file will play at the wrong speed)
 6. Use this code to play the file
 ```cpp
-// calculate number of samples in the file
-unsigned int numSamples = audio_file_raw_len / 2;
-// Allocate memory for stereo samples (2 times larger than mono samples)
-uint16_t stereoSamples[8192];
+#include "audio-file.h"
 
-for(int i = 0; i < numSamples; i++){
-	int16_t rawSample = audio_file_raw[i * 2] | (audio_file_raw[i * 2 + 1] << 8);
-	// convert to unsigned 16 bit sample
-	stereoSamples[(i * 2) % 8192] = rawSample;
-	stereoSamples[((i * 2) % 8192) + 1] = rawSample;
-	
-	if((i * 2) % 8192 == 0 && i != 0)
-	{
-		HAL_I2S_Transmit(&hi2s2, stereoSamples, 8192, HAL_MAX_DELAY);
- 	        delay(8192 / 22050 * 1000); // replace 22050 with your sample rate
-	}
-}
+i2s.play(your_file_raw, your_file_raw_len);
 ```
-
-This will be an example soon.

@@ -1,6 +1,6 @@
 {
 	"name": "Portenta-I2S",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"description": "A simple I2S implementation using HAL for the Portenta H7 series.",
 	"repository":
   {
