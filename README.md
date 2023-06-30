@@ -30,13 +30,25 @@ i2s.begin();
 ```
 
 3. Play your audio buffer
+
+You can do this 2 ways - either by create a 16bit audio buffer and calling play:
 ```cpp
 i2s.play(buffer, bufferLen);
 ```
 
+Or you can also read a raw 8-bit PCM audio file, and provide it directly to i2s.play:
+```cpp
+#include "audio-file.h"
+i2s.play(audio_file_raw, audio_file_raw_len);
+```
+
+You can see documentation on how to generate such a file [here](https://dev.toddr.org/i2s-audio-playback-on-the-portenta-h7/).
+
 4. Record audio into a 32bit buffer
 ```cpp
-
+#define BUFFER_LEN 8000 * 5 * 2 // 8000hz for 5 seconds for 2 channels (left, right)
+uint32_t rxBuffer[BUFFER_LEN];
+i2s.record(rxBuffer, BUFFER_LEN);
 ```
 
 ## Examples
